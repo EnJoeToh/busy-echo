@@ -10,17 +10,22 @@ function activate(context) {
     console.log('"echo" is now active');
     let echo = vscode.commands.registerCommand('busy-echo.echo', () => {
         let activeEditor = vscode.window.activeTextEditor;
+        let timeId;
         //テキストの変動をキャッチ
         vscode.workspace.onDidChangeTextDocument(event => {
-            if (activeEditor && event.document === activeEditor.document) {
-                //変更があった箇所を表示
-                for (const change of event.contentChanges) {
-                    console.log("変化： " + red + change.text + reset);
+            clearTimeout(timeId);
+            let repeater = () => {
+                if (activeEditor && event.document === activeEditor.document) {
+                    //変更があった箇所を表示
+                    for (const change of event.contentChanges) {
+                        console.log("変化： " + red + change.text + reset);
+                    }
+                    //全文を表示
+                    let fullText = activeEditor.document.getText();
+                    console.log("全文： " + green + "「" + fullText + "」\n" + reset);
                 }
-                //全文を表示
-                let fullText = activeEditor.document.getText();
-                console.log("全文： " + green + "「" + fullText + "」\n" + reset);
-            }
+            };
+            timeId = setTimeout(repeater, 50);
         });
     });
     context.subscriptions.push(echo);
